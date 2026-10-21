@@ -2,6 +2,11 @@ name: Build iOS IPA
 
 on:
   workflow_dispatch:
+    inputs:
+      game_zip_url:
+        description: 'URL ของไฟล์ game.zip (หรือปล่อยว่างถ้าจะใช้วิธีอื่น)'
+        required: false
+        default: ''
 
 jobs:
   build:
@@ -19,9 +24,18 @@ jobs:
       - name: Install xcodegen
         run: brew install xcodegen
 
+      - name: Download Game Assets
+        run: |
+          # ตรงนี้ถ้าคุณมีลิงก์ตรงสำหรับดาวน์โหลด game.zip ให้ใส่แทนที่ลิงก์ตัวอย่าง หรือสร้างโฟลเดอร์จำลองไว้เทสก่อนได้ครับ
+          mkdir -p b/testbuild
+          touch b/testbuild/game.wasm
+          mkdir -p data
+          echo "dummy" > data/test.bin
+          zip -r game.zip b data
+
       - name: Build IPA
         run: |
-          FREE=1 BUNDLE_ID=com.muguet.gtav ./make-ios.sh --ipa
+          FREE=1 BUNDLE_ID=com.muguet.gtav ./make-ios.sh game.zip --ipa
 
       - name: Upload IPA Artifact
         uses: actions/upload-artifact@v4
